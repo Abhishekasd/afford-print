@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import { motion, useScroll, useSpring } from 'framer-motion'
+import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import { 
   Upload, Smartphone, Clock, ShieldCheck, CheckCircle2, 
-  ChevronDown, FileText, LayoutDashboard, ExternalLink, Trash2 
+  ChevronDown, FileText, LayoutDashboard, ExternalLink, Trash2,
+  Image, Paperclip, PenTool, BookOpen, Edit3, Globe, Layout, User
 } from 'lucide-react'
 import { supabase } from './lib/supabase'
 import './App.css'
@@ -23,64 +24,71 @@ function HeroAnimation() {
 
   useEffect(() => {
     const canvas = canvasRef.current
+    if (!canvas) return
     const context = canvas.getContext('2d')
+    if (!context) return
 
-    // Preload images
     const loadedImages = []
     let loadedCount = 0
 
+    const renderFrame = (index) => {
+      const img = loadedImages[index]
+      if (!img || !canvas || !context) return
+      
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      
+      const ratio = Math.max(canvas.width / img.width, canvas.height / img.height)
+      const centerShift_x = (canvas.width - img.width * ratio) / 2
+      const centerShift_y = (canvas.height - img.height * ratio) / 2
+      
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(img, 0, 0, img.width, img.height, centerShift_x, centerShift_y, img.width * ratio, img.height * ratio)
+    }
+
     for (let i = 0; i < frameCount; i++) {
-      const img = new Image()
+      const img = new window.Image()
       img.src = currentFrame(i)
       img.onload = () => {
+        loadedImages[i] = img
         loadedCount++
         if (loadedCount === frameCount) {
+          setImages(loadedImages)
           renderFrame(0)
+          
+          const sequence = { frame: 0 }
+          gsap.to(sequence, {
+            frame: frameCount - 1,
+            snap: 'frame',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: '.hero-sequence-container',
+              start: 'top top',
+              end: '+=300%',
+              scrub: 0.5,
+              pin: true,
+            },
+            onUpdate: () => renderFrame(sequence.frame)
+          })
         }
       }
-      loadedImages.push(img)
-    }
-    setImages(loadedImages)
-
-    const renderFrame = (index) => {
-      if (loadedImages[index]) {
-        canvas.width = window.innerWidth
-        canvas.height = window.innerHeight
-        
-        // Draw image aspect fill
-        const img = loadedImages[index]
-        const ratio = Math.max(canvas.width / img.width, canvas.height / img.height)
-        const centerShift_x = (canvas.width - img.width * ratio) / 2
-        const centerShift_y = (canvas.height - img.height * ratio) / 2
-        
-        context.clearRect(0, 0, canvas.width, canvas.height)
-        context.drawImage(img, 0, 0, img.width, img.height, centerShift_x, centerShift_y, img.width * ratio, img.height * ratio)
-      }
     }
 
-    // GSAP Sequence
-    const sequence = { frame: 0 }
-    gsap.to(sequence, {
-      frame: frameCount - 1,
-      snap: 'frame',
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '.hero-sequence-container',
-        start: 'top top',
-        end: '+=300%',
-        scrub: 0.5,
-        pin: true,
-      },
-      onUpdate: () => renderFrame(sequence.frame)
-    })
+    const handleResize = () => {
+      // Find current frame from scroll progress if possible, or just render frame 0
+      renderFrame(0)
+    }
 
-    window.addEventListener('resize', () => renderFrame(sequence.frame))
-    return () => window.removeEventListener('resize', () => renderFrame(sequence.frame))
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      ScrollTrigger.getAll().forEach(st => st.kill())
+    }
   }, [])
 
   return (
     <div className="hero-sequence-container" style={{ height: '100vh', width: '100%', position: 'relative' }}>
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
       <div className="scene-content" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none', textAlign: 'center' }}>
         <motion.h1 
           className="display-xl"
@@ -96,6 +104,97 @@ function HeroAnimation() {
         </p>
       </div>
     </div>
+  )
+}
+
+function PricingSection() {
+  const [activeTab, setActiveTab] = useState('printing')
+
+  const categories = {
+    printing: [
+      { name: 'Black & White', price: '₹1 / page', desc: 'High-quality for notes & docs.', icon: <FileText size={24} /> },
+      { name: 'Color Printing', price: '₹5 / page', desc: 'Vibrant prints for presentations.', icon: <Image size={24} /> },
+      { name: 'Spiral Binding', price: '₹25 / file', desc: 'Strong, neat practical files.', icon: <Paperclip size={24} /> }
+    ],
+    academic: [
+      { name: 'Assignment Writing', price: 'Based on content', desc: 'Neat & formatted assignments.', icon: <PenTool size={24} /> },
+      { name: 'Practical Files', price: 'Based on pages', desc: 'Well-structured presentation.', icon: <BookOpen size={24} /> },
+      { name: 'Copy Writing', price: 'Based on content', desc: 'Clear, neat handwritten work.', icon: <Edit3 size={24} /> }
+    ],
+    digital: [
+      { name: 'Website Creation', price: 'From ₹499', desc: 'Simple, responsive student sites.', icon: <Globe size={24} /> },
+      { name: 'PPT Design', price: '₹30 (7-8 slides)', desc: 'Academic-focused structures.', icon: <Layout size={24} /> },
+      { name: 'Resume Design', price: 'From ₹50', desc: 'Professional student resumes.', icon: <User size={24} /> }
+    ]
+  }
+
+  return (
+    <section className="scene" id="pricing" style={{ background: 'var(--surface)' }}>
+      <div className="scene-content">
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h2 className="headline-lg">Premium Services. Student Prices.</h2>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '24px' }}>
+            {Object.keys(categories).map(cat => (
+              <button 
+                key={cat}
+                onClick={() => setActiveTab(cat)}
+                className={`button ${activeTab === cat ? 'button-primary' : ''}`}
+                style={{ 
+                  textTransform: 'capitalize', 
+                  padding: '12px 24px', 
+                  background: activeTab === cat ? 'var(--primary)' : 'rgba(0,0,0,0.05)', 
+                  color: activeTab === cat ? 'white' : 'var(--on-surface)',
+                  borderRadius: '30px'
+                }}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={activeTab}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              style={{ display: 'contents' }}
+            >
+              {categories[activeTab].map((item, idx) => (
+                <motion.div 
+                  key={item.name}
+                  className="glass-card"
+                  whileHover={{ y: -5, boxShadow: 'var(--glass-glow)' }}
+                >
+                  <div style={{ color: 'var(--primary)', marginBottom: '16px' }}>{item.icon}</div>
+                  <h3 style={{ marginBottom: '8px' }}>{item.name}</h3>
+                  <p style={{ fontSize: '0.9rem', opacity: 0.7, marginBottom: '16px' }}>{item.desc}</p>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent)' }}>{item.price}</div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div style={{ marginTop: '80px', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '20px', textAlign: 'center' }}>
+          {[
+            { label: 'Transparent Pricing', icon: '💎' },
+            { label: 'Affordable Rates', icon: '💰' },
+            { label: 'Student Friendly', icon: '🎓' },
+            { label: '24/7 Service', icon: '⏰' },
+            { label: 'No Hidden Charges', icon: '✔️' }
+          ].map(trust => (
+            <div key={trust.label} style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+              <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{trust.icon}</div>
+              {trust.label}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -368,24 +467,7 @@ function LandingPage() {
           </div>
         </section>
 
-        {/* Scene 6: Transparency */}
-        <section className="scene" style={{ background: 'var(--surface-dim)' }}>
-          <div className="scene-content">
-            <h2 className="headline-lg" style={{ textAlign: 'center' }}>No hidden fees. Just green growth.</h2>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '48px' }}>
-              <div className="glass-card" style={{ width: '300px', textAlign: 'center' }}>
-                <h3>Standard B&W</h3>
-                <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--accent)', margin: '16px 0' }}>₹1 <span style={{ fontSize: '1rem', color: 'var(--on-surface-variant)' }}>/ pg</span></div>
-                <p>Academic standard output.</p>
-              </div>
-              <div className="glass-card" style={{ width: '300px', textAlign: 'center', border: '2px solid var(--accent)' }}>
-                <h3>Premium Color</h3>
-                <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--accent)', margin: '16px 0' }}>₹5 <span style={{ fontSize: '1rem', color: 'var(--on-surface-variant)' }}>/ pg</span></div>
-                <p>Vivid research presentations.</p>
-              </div>
-            </div>
-          </div>
-        </section>
+        <PricingSection />
 
         {/* Scene 7: Community */}
         <section className="scene">
@@ -459,8 +541,15 @@ function LandingPage() {
       </main>
       
       <footer style={{ padding: '80px 40px', background: '#0a1a2b', color: 'white', textAlign: 'center' }}>
-        <div className="brand" style={{ color: 'white', marginBottom: '24px' }}>AFFORD PRINT</div>
-        <p style={{ opacity: 0.6 }}>© 2026 Afford Print. Built with precision for students.</p>
+        <div className="brand" style={{ color: 'white', marginBottom: '16px' }}>AFFORD PRINT</div>
+        <p style={{ fontSize: '1.2rem', marginBottom: '24px', opacity: 0.9 }}>
+          Affordable printing and digital services — built for students.
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '40px', opacity: 0.8 }}>
+          <div>📞 Call / WhatsApp: <strong>9027442522</strong></div>
+          <div>🚚 Home Delivery Available</div>
+        </div>
+        <p style={{ opacity: 0.4, fontSize: '0.9rem' }}>© 2026 Afford Print. Print Smart. Do More. Pay Less.</p>
       </footer>
     </div>
   )
