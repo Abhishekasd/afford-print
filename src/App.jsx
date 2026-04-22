@@ -556,26 +556,92 @@ function LandingPage() {
 }
 
 function AdminDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(sessionStorage.getItem('adminAuth') === 'true')
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [error, setError] = useState('')
+
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchOrders()
-    const subscription = supabase
-      .channel('orders-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchOrders)
-      .subscribe()
+    if (isAuthenticated) {
+      fetchOrders()
+      const subscription = supabase
+        .channel('orders-realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchOrders)
+        .subscribe()
 
-    return () => {
-      supabase.removeChannel(subscription)
+      return () => {
+        supabase.removeChannel(subscription)
+      }
     }
-  }, [])
+  }, [isAuthenticated])
 
   const fetchOrders = async () => {
     const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false })
     if (error) console.error(error)
     else setOrders(data)
     setLoading(false)
+  }
+
+  const handleLogin = (e) => {
+    e.preventDefault()
+    if (loginEmail === 'abhisheksharma06022006@gmail.com' && loginPassword === 'abhishek5561') {
+      setIsAuthenticated(true)
+      sessionStorage.setItem('adminAuth', 'true')
+      setError('')
+    } else {
+      setError('Invalid admin credentials.')
+    }
+  }
+
+  const handleLogout = () => {
+    setIsAuthenticated(false)
+    sessionStorage.removeItem('adminAuth')
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="page-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--surface-dim)' }}>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="glass-card" 
+          style={{ width: '100%', maxWidth: '400px', textAlign: 'center' }}
+        >
+          <div className="brand" style={{ marginBottom: '32px' }}>AFFORD PRINT</div>
+          <h2 className="headline-sm" style={{ marginBottom: '24px' }}>Admin Authentication</h2>
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Email Address</label>
+              <input 
+                type="email" 
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                placeholder="admin@example.com"
+                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)' }}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Password</label>
+              <input 
+                type="password" 
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                placeholder="••••••••"
+                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)' }}
+                required
+              />
+            </div>
+            {error && <p style={{ color: '#e74c3c', fontSize: '0.9rem' }}>{error}</p>}
+            <button type="submit" className="button button-primary" style={{ marginTop: '16px' }}>Login to Dashboard</button>
+          </form>
+          <Link to="/" style={{ display: 'block', marginTop: '24px', opacity: 0.6, fontSize: '0.9rem', textDecoration: 'none' }}>← Back to Public Site</Link>
+        </motion.div>
+      </div>
+    )
   }
 
   const updateStatus = async (id, status) => {
@@ -591,8 +657,11 @@ function AdminDashboard() {
   return (
     <div className="page-shell" style={{ padding: '40px' }}>
       <header className="nav-container" style={{ marginBottom: '40px' }}>
-        <Link to="/" className="brand">AFFORD PRINT</Link>
-        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Order Management</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <Link to="/" className="brand">AFFORD PRINT</Link>
+          <h1 style={{ margin: 0, fontSize: '1.25rem', opacity: 0.6 }}>Order Management</h1>
+        </div>
+        <button onClick={handleLogout} className="button" style={{ background: '#eee' }}>Logout</button>
       </header>
 
       <main className="glass-card">
@@ -611,21 +680,20 @@ function AdminDashboard() {
               <tbody>
                 {orders.map(order => (
                   <tr key={order.id} style={{ borderBottom: '1px solid var(--outline-variant)' }}>
-                    <td style={{ padding: '12px' }}>
-                      <strong>{order.name}</strong><br />
-                      <small>{order.phone}</small>
+                    <td style={{ padding: '16px 12px' }}>
+                      <div style={{ fontWeight: 600 }}>{order.customer_name}</div>
+                      <div style={{ fontSize: '0.85rem', opacity: 0.6 }}>{order.customer_phone}</div>
                     </td>
                     <td>
-                      <a href={order.file_url} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)' }}>
-                        <FileText size={16} /> View File <ExternalLink size={14} />
+                      <a href={order.file_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        View PDF <ExternalLink size={14} />
                       </a>
                     </td>
                     <td>
                       <select 
                         value={order.status} 
                         onChange={(e) => updateStatus(order.id, e.target.value)}
-                        style={{ padding: '4px', borderRadius: '4px' }}
-                        aria-label={`Change status for ${order.name}'s order`}
+                        style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc' }}
                       >
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
