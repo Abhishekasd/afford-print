@@ -99,9 +99,8 @@ function HeroAnimation() {
   )
 }
 
-function CustomCursor({ mousePos }) {
-  const cursorX = useSpring(mousePos.x, { damping: 20, stiffness: 200 })
-  const cursorY = useSpring(mousePos.y, { damping: 20, stiffness: 200 })
+function CustomCursor({ mousePos, isHovering }) {
+  // Glow uses springs for that cinematic "trailing" feel
   const glowX = useSpring(mousePos.x, { damping: 10, stiffness: 50 })
   const glowY = useSpring(mousePos.y, { damping: 10, stiffness: 50 })
 
@@ -109,11 +108,32 @@ function CustomCursor({ mousePos }) {
     <>
       <motion.div 
         className="custom-cursor" 
-        style={{ x: cursorX, y: cursorY, left: 0, top: 0 }}
+        animate={{
+          scale: isHovering ? 4 : 1,
+          backgroundColor: isHovering ? 'rgba(39, 174, 96, 0.4)' : 'var(--primary)',
+          border: isHovering ? '1px solid var(--accent)' : 'none'
+        }}
+        style={{ 
+          x: mousePos.x, // Raw coordinate for zero lag
+          y: mousePos.y, // Raw coordinate for zero lag
+          left: 0, 
+          top: 0,
+          translateX: '-50%',
+          translateY: '-50%'
+        }}
       />
       <motion.div 
         className="cursor-glow" 
-        style={{ x: glowX, y: glowY, left: 0, top: 0, xPercent: -50, yPercent: -50 }}
+        animate={{
+          scale: isHovering ? 1.5 : 1,
+          opacity: isHovering ? 0.8 : 0.4
+        }}
+        style={{ 
+          x: glowX, 
+          y: glowY, 
+          left: 0, 
+          top: 0 
+        }}
       />
     </>
   )
@@ -123,6 +143,7 @@ function CustomCursor({ mousePos }) {
 
 function LandingPage() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [isHovering, setIsHovering] = useState(false)
   const [copies, setCopies] = useState(1)
   const [file, setFile] = useState(null)
   const [name, setName] = useState('')
@@ -136,7 +157,7 @@ function LandingPage() {
       requestAnimationFrame(raf)
     }
     requestAnimationFrame(raf)
-
+    
     const scenes = gsap.utils.toArray('.scene')
     scenes.forEach((scene, i) => {
       const content = scene.querySelector('.scene-content')
@@ -154,7 +175,6 @@ function LandingPage() {
               start: 'top 70%',
               end: 'top 20%',
               toggleActions: 'play none none reverse',
-              // scrub: true // Uncomment for scrubbed feel
             }
           }
         )
@@ -162,10 +182,20 @@ function LandingPage() {
     })
 
     const handleMouseMove = (e) => setMousePos({ x: e.clientX, y: e.clientY })
+    const handleMouseOver = (e) => {
+      if (e.target.closest('button, a, .glass-card')) {
+        setIsHovering(true)
+      } else {
+        setIsHovering(false)
+      }
+    }
+
     window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseover', handleMouseOver)
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseover', handleMouseOver)
       lenis.destroy()
     }
   }, [])
@@ -219,7 +249,7 @@ function LandingPage() {
 
   return (
     <div className="page-shell">
-      <CustomCursor mousePos={mousePos} />
+      <CustomCursor mousePos={mousePos} isHovering={isHovering} />
       
       <nav className="top-nav">
         <div className="nav-container">
