@@ -1,0 +1,31 @@
+:root {
+  /* PRD Specification: Blue for Trust, Green for Pricing */
+  --primary: #0A3D62;
+  --primary-light: #3A7CA5;
+  --accent: #27AE60;
+  --accent-light: #6FCF97;
+  --background: #FFFFFF;
+  --on-background: #0A1A2B;
+
+  /* Surface / Container Roles */
+  --surface: #FFFFFF;
+  --surface-dim: #F4F7F9;
+  --on-surface: #0A3D62;
+  --on-surface-variant: #3D5066;
+  
+  /* Glass-morphism (PRD: blur 8px) */
+  --glass-bg: rgba(255, 255, 255, 0.2);
+  --glass-blur: 8px;
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-glow: rgba(39, 174, 96, 0.3);
+
+  /* Typography */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif; /* PRD: Inter for readability */
+
+  /* Roundedness */
+  --radius-sm: 4px;
+  --radius-default: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+}
