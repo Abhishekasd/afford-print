@@ -133,7 +133,7 @@ function PricingSection() {
       <div className="scene-content">
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
           <h2 className="headline-lg">Premium Services. Student Prices.</h2>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '24px', flexWrap: 'wrap' }}>
             {Object.keys(categories).map(cat => (
               <button 
                 key={cat}
@@ -144,7 +144,8 @@ function PricingSection() {
                   padding: '12px 24px', 
                   background: activeTab === cat ? 'var(--primary)' : 'rgba(0,0,0,0.05)', 
                   color: activeTab === cat ? 'white' : 'var(--on-surface)',
-                  borderRadius: '30px'
+                  borderRadius: '30px',
+                  minWidth: '120px'
                 }}
               >
                 {cat}
@@ -153,7 +154,7 @@ function PricingSection() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+        <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
           <AnimatePresence mode="wait">
             <motion.div 
               key={activeTab}
@@ -179,7 +180,8 @@ function PricingSection() {
           </AnimatePresence>
         </div>
 
-        <div style={{ marginTop: '80px', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '20px', textAlign: 'center' }}>
+        {/* Why Choose Us */}
+        <div className="responsive-grid" style={{ marginTop: '80px', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '20px', textAlign: 'center' }}>
           {[
             { label: 'Transparent Pricing', icon: '💎' },
             { label: 'Affordable Rates', icon: '💰' },
@@ -248,6 +250,7 @@ function LandingPage() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [printType, setPrintType] = useState('B&W')
 
   useEffect(() => {
     const lenis = new Lenis()
@@ -326,7 +329,7 @@ function LandingPage() {
           name,
           phone,
           file_url: publicUrlData.publicUrl,
-          instructions: `${copies} copies`,
+          instructions: `${copies} copies, ${printType} print`,
           status: 'pending'
         }
       ])
@@ -334,7 +337,7 @@ function LandingPage() {
       if (dbError) throw dbError
 
       // 3. Open WhatsApp
-      const waMsg = `Hello Afford Print! I just placed an order.\nName: ${name}\nCopies: ${copies}\nFile: ${publicUrlData.publicUrl}`
+      const waMsg = `Hello Afford Print! I just placed an order.\nName: ${name}\nCopies: ${copies}\nType: ${printType} print\nFile: ${publicUrlData.publicUrl}`
       window.open(`https://wa.me/919027442522?text=${encodeURIComponent(waMsg)}`, '_blank')
       
       alert('Order placed successfully!')
@@ -384,6 +387,7 @@ function LandingPage() {
           <div className="scene-content">
             <h2 className="headline-lg" style={{ textAlign: 'center' }}>A Stitched Service Experience.</h2>
             <motion.div 
+              className="responsive-grid"
               style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px', marginTop: '48px' }}
               initial="hidden"
               whileInView="show"
@@ -496,12 +500,24 @@ function LandingPage() {
                 </label>
               </div>
               
-              <div style={{ marginTop: '40px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', textAlign: 'left' }}>
+              <div className="responsive-grid" style={{ marginTop: '40px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', textAlign: 'left' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <label style={{ fontWeight: 600 }}>Full Name</label>
                   <input value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)' }} />
                   <label style={{ fontWeight: 600 }}>WhatsApp Number</label>
                   <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 0000000000" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)' }} />
+                  
+                  <label style={{ fontWeight: 600, marginTop: '8px' }}>Print Type</label>
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                      <input type="radio" name="printType" value="B&W" checked={printType === 'B&W'} onChange={(e) => setPrintType(e.target.value)} />
+                      Black & White
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                      <input type="radio" name="printType" value="Color" checked={printType === 'Color'} onChange={(e) => setPrintType(e.target.value)} />
+                      Colored
+                    </label>
+                  </div>
                 </div>
                 <div>
                   <label id="copies-label" style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Copies</label>
@@ -540,14 +556,14 @@ function LandingPage() {
         </section>
       </main>
       
-      <footer style={{ padding: '80px 40px', background: '#0a1a2b', color: 'white', textAlign: 'center' }}>
+      <footer style={{ padding: '80px 24px', background: '#0a1a2b', color: 'white', textAlign: 'center' }}>
         <div className="brand" style={{ color: 'white', marginBottom: '16px' }}>AFFORD PRINT</div>
         <p style={{ fontSize: '1.2rem', marginBottom: '24px', opacity: 0.9 }}>
           Affordable printing and digital services — built for students.
         </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '40px', opacity: 0.8 }}>
-          <div>📞 Call / WhatsApp: <strong>9027442522</strong></div>
-          <div>🚚 Home Delivery Available</div>
+        <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginBottom: '40px', opacity: 0.8 }}>
+          <div>📞 Call / WhatsApp: <br /><strong>9027442522</strong></div>
+          <div>🚚 Home Delivery <br />Available</div>
         </div>
         <p style={{ opacity: 0.4, fontSize: '0.9rem' }}>© 2026 Afford Print. Print Smart. Do More. Pay Less.</p>
       </footer>
@@ -655,19 +671,19 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="page-shell" style={{ padding: '40px' }}>
-      <header className="nav-container" style={{ marginBottom: '40px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+    <div className="page-shell" style={{ padding: '24px' }}>
+      <header className="nav-container" style={{ marginBottom: '40px', flexDirection: 'column', height: 'auto', gap: '20px', padding: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <Link to="/" className="brand">AFFORD PRINT</Link>
-          <h1 style={{ margin: 0, fontSize: '1.25rem', opacity: 0.6 }}>Order Management</h1>
+          <button onClick={handleLogout} className="button" style={{ background: '#eee', padding: '8px 16px' }}>Logout</button>
         </div>
-        <button onClick={handleLogout} className="button" style={{ background: '#eee' }}>Logout</button>
+        <h1 style={{ margin: 0, fontSize: '1.25rem', opacity: 0.6, width: '100%', textAlign: 'left' }}>Order Management</h1>
       </header>
 
-      <main className="glass-card">
+      <main className="glass-card" style={{ padding: '12px' }}>
         {loading ? <p role="status">Loading orders...</p> : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
               <caption>Incoming Student Print Orders</caption>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--outline-variant)' }}>
@@ -681,13 +697,14 @@ function AdminDashboard() {
                 {orders.map(order => (
                   <tr key={order.id} style={{ borderBottom: '1px solid var(--outline-variant)' }}>
                     <td style={{ padding: '16px 12px' }}>
-                      <div style={{ fontWeight: 600 }}>{order.customer_name}</div>
-                      <div style={{ fontSize: '0.85rem', opacity: 0.6 }}>{order.customer_phone}</div>
+                      <div style={{ fontWeight: 600 }}>{order.name}</div>
+                      <div style={{ fontSize: '0.85rem', opacity: 0.6 }}>{order.phone}</div>
                     </td>
                     <td>
                       <a href={order.file_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         View PDF <ExternalLink size={14} />
                       </a>
+                      <div style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: '4px' }}>{order.instructions}</div>
                     </td>
                     <td>
                       <select 
