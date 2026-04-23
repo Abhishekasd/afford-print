@@ -109,6 +109,17 @@ function HeroAnimation() {
 
 function PricingSection() {
   const [activeTab, setActiveTab] = useState('printing')
+  const [portfolioItems, setPortfolioItems] = useState([])
+
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      const { data, error } = await supabase.from('portfolio').select('*').order('created_at', { ascending: false })
+      if (!error) setPortfolioItems(data || [])
+    }
+    fetchPortfolio()
+  }, [])
+
+  const currentPortfolio = portfolioItems.filter(item => item.category === activeTab)
 
   const categories = {
     printing: [
@@ -179,6 +190,33 @@ function PricingSection() {
             </motion.div>
           </AnimatePresence>
         </div>
+
+        {/* Past Work / Portfolio Gallery */}
+        {currentPortfolio.length > 0 && (
+          <div style={{ marginTop: '80px' }}>
+            <h3 className="headline-sm" style={{ textAlign: 'center', marginBottom: '32px' }}>Our Past Work</h3>
+            <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+              <AnimatePresence mode="popLayout">
+                {currentPortfolio.map((item, idx) => (
+                  <motion.div 
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3, delay: idx * 0.1 }}
+                    className="glass-card"
+                    style={{ padding: '0', overflow: 'hidden' }}
+                    whileHover={{ y: -5, boxShadow: 'var(--glass-glow)' }}
+                  >
+                    <img src={item.image_url} alt={item.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                    <div style={{ padding: '16px', textAlign: 'center', fontWeight: 600 }}>{item.title}</div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
 
         {/* Why Choose Us */}
         <div className="responsive-grid" style={{ marginTop: '80px', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '20px', textAlign: 'center' }}>
@@ -584,10 +622,18 @@ function AdminDashboard() {
 
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  
+  const [adminTab, setAdminTab] = useState('orders')
+  const [portfolioItems, setPortfolioItems] = useState([])
+  const [portTitle, setPortTitle] = useState('')
+  const [portCategory, setPortCategory] = useState('printing')
+  const [portFile, setPortFile] = useState(null)
+  const [portUploading, setPortUploading] = useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchOrders()
+      fetchPortfolio()
       const subscription = supabase
         .channel('orders-realtime')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchOrders)
@@ -604,6 +650,51 @@ function AdminDashboard() {
     if (error) console.error(error)
     else setOrders(data)
     setLoading(false)
+  }
+
+  const fetchPortfolio = async () => {
+    const { data, error } = await supabase.from('portfolio').select('*').order('created_at', { ascending: false })
+    if (error) console.error(error)
+    else setPortfolioItems(data || [])
+  }
+
+  const handlePortfolioUpload = async (e) => {
+    e.preventDefault()
+    if (!portFile || !portTitle) return alert('Fill all fields')
+    setPortUploading(true)
+    try {
+      const fileExt = portFile.name.split('.').pop()
+      const fileName = `${Math.random().toString(36).substring(7)}.${fileExt}`
+      const filePath = `portfolio/${fileName}`
+
+      const { error: uploadError } = await supabase.storage.from('portfolio-files').upload(filePath, portFile)
+      if (uploadError) throw uploadError
+
+      const { data: publicUrlData } = supabase.storage.from('portfolio-files').getPublicUrl(filePath)
+
+      const { error: dbError } = await supabase.from('portfolio').insert([
+        { title: portTitle, category: portCategory, image_url: publicUrlData.publicUrl }
+      ])
+      if (dbError) throw dbError
+
+      alert('Portfolio item added!')
+      setPortTitle('')
+      setPortFile(null)
+      e.target.reset()
+      fetchPortfolio()
+    } catch (err) {
+      console.error(err)
+      alert('Upload failed. Ensure portfolio table and portfolio-files bucket exist.')
+    } finally {
+      setPortUploading(false)
+    }
+  }
+
+  const deletePortfolioItem = async (id) => {
+    if (confirm('Delete this portfolio item?')) {
+      await supabase.from('portfolio').delete().eq('id', id)
+      fetchPortfolio()
+    }
   }
 
   const handleLogin = (e) => {
@@ -682,60 +773,93 @@ function AdminDashboard() {
           <Link to="/" className="brand">AFFORD PRINT</Link>
           <button onClick={handleLogout} className="button" style={{ background: '#eee', padding: '8px 16px' }}>Logout</button>
         </div>
-        <h1 style={{ margin: 0, fontSize: '1.25rem', opacity: 0.6, width: '100%', textAlign: 'left' }}>Order Management</h1>
+        <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
+          <button onClick={() => setAdminTab('orders')} className={`button ${adminTab === 'orders' ? 'button-primary' : ''}`} style={{ padding: '8px 16px' }}>Orders</button>
+          <button onClick={() => setAdminTab('portfolio')} className={`button ${adminTab === 'portfolio' ? 'button-primary' : ''}`} style={{ padding: '8px 16px' }}>Portfolio</button>
+        </div>
       </header>
 
       <main className="glass-card" style={{ padding: '12px' }}>
-        {loading ? <p role="status">Loading orders...</p> : (
-          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
-              <caption>Incoming Student Print Orders</caption>
-              <thead>
-                <tr style={{ borderBottom: '2px solid var(--outline-variant)' }}>
-                  <th scope="col" style={{ padding: '12px' }}>Customer</th>
-                  <th scope="col">File</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map(order => (
-                  <tr key={order.id} style={{ borderBottom: '1px solid var(--outline-variant)' }}>
-                    <td style={{ padding: '16px 12px' }}>
-                      <div style={{ fontWeight: 600 }}>{order.name}</div>
-                      <div style={{ fontSize: '0.85rem', opacity: 0.6 }}>{order.phone}</div>
-                    </td>
-                    <td>
-                      <a href={order.file_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        View PDF <ExternalLink size={14} />
-                      </a>
-                      <div style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: '4px' }}>{order.instructions}</div>
-                    </td>
-                    <td>
-                      <select 
-                        value={order.status} 
-                        onChange={(e) => updateStatus(order.id, e.target.value)}
-                        style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc' }}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </td>
-                    <td>
-                      <button 
-                        onClick={() => deleteOrder(order.id)} 
-                        style={{ color: '#e74c3c', background: 'none', border: 'none', cursor: 'pointer' }}
-                        aria-label="Delete order"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
+      <main className="glass-card" style={{ padding: '12px' }}>
+        {adminTab === 'orders' ? (
+          loading ? <p role="status">Loading orders...</p> : (
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
+                <caption>Incoming Student Print Orders</caption>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--outline-variant)' }}>
+                    <th scope="col" style={{ padding: '12px' }}>Customer</th>
+                    <th scope="col">File</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {orders.map(order => (
+                    <tr key={order.id} style={{ borderBottom: '1px solid var(--outline-variant)' }}>
+                      <td style={{ padding: '16px 12px' }}>
+                        <div style={{ fontWeight: 600 }}>{order.name}</div>
+                        <div style={{ fontSize: '0.85rem', opacity: 0.6 }}>{order.phone}</div>
+                      </td>
+                      <td>
+                        <a href={order.file_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          View PDF <ExternalLink size={14} />
+                        </a>
+                        <div style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: '4px' }}>{order.instructions}</div>
+                      </td>
+                      <td>
+                        <select 
+                          value={order.status} 
+                          onChange={(e) => updateStatus(order.id, e.target.value)}
+                          style={{ padding: '6px', borderRadius: '4px', border: '1px solid #ccc' }}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="processing">Processing</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </td>
+                      <td>
+                        <button 
+                          onClick={() => deleteOrder(order.id)} 
+                          style={{ color: '#e74c3c', background: 'none', border: 'none', cursor: 'pointer' }}
+                          aria-label="Delete order"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        ) : (
+          <div style={{ padding: '16px' }}>
+            <h2 className="headline-sm">Add Portfolio Item</h2>
+            <form onSubmit={handlePortfolioUpload} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '40px' }}>
+              <input type="text" placeholder="Title (e.g. Bio PPT)" value={portTitle} onChange={e => setPortTitle(e.target.value)} required style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)', flex: 1, minWidth: '200px' }} />
+              <select value={portCategory} onChange={e => setPortCategory(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)' }}>
+                <option value="printing">Printing</option>
+                <option value="academic">Academic</option>
+                <option value="digital">Digital</option>
+              </select>
+              <input type="file" accept="image/*,application/pdf" onChange={e => setPortFile(e.target.files[0])} required style={{ padding: '12px' }} />
+              <button type="submit" className="button button-primary" disabled={portUploading}>{portUploading ? 'Uploading...' : 'Upload Work'}</button>
+            </form>
+
+            <h2 className="headline-sm">Current Portfolio</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '24px' }}>
+              {portfolioItems.map(item => (
+                <div key={item.id} style={{ border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px' }}>
+                  <img src={item.image_url} alt={item.title} style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '4px', marginBottom: '12px' }} />
+                  <div style={{ fontWeight: 600 }}>{item.title}</div>
+                  <div style={{ fontSize: '0.85rem', opacity: 0.6, marginBottom: '12px', textTransform: 'capitalize' }}>{item.category}</div>
+                  <button onClick={() => deletePortfolioItem(item.id)} style={{ color: '#e74c3c', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}><Trash2 size={16} /> Delete</button>
+                </div>
+              ))}
+              {portfolioItems.length === 0 && <p style={{ opacity: 0.6 }}>No portfolio items uploaded yet.</p>}
+            </div>
           </div>
         )}
       </main>
