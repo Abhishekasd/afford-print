@@ -506,43 +506,48 @@ function LandingPage() {
                   <input value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)' }} />
                   <label style={{ fontWeight: 600 }}>WhatsApp Number</label>
                   <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 0000000000" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)' }} />
-                  
-                  <label style={{ fontWeight: 600, marginTop: '8px' }}>Print Type</label>
-                  <div style={{ display: 'flex', gap: '16px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                      <input type="radio" name="printType" value="B&W" checked={printType === 'B&W'} onChange={(e) => setPrintType(e.target.value)} />
-                      Black & White
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                      <input type="radio" name="printType" value="Color" checked={printType === 'Color'} onChange={(e) => setPrintType(e.target.value)} />
-                      Colored
-                    </label>
-                  </div>
                 </div>
-                <div>
-                  <label id="copies-label" style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Copies</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <button 
-                      onClick={() => setCopies(c => Math.max(1, c-1))} 
-                      className="button" 
-                      style={{ padding: '8px 16px', background: '#eee' }}
-                      aria-label="Decrease copies"
-                    >
-                      -
-                    </button>
-                    <strong aria-labelledby="copies-label">{copies}</strong>
-                    <button 
-                      onClick={() => setCopies(c => c+1)} 
-                      className="button" 
-                      style={{ padding: '8px 16px', background: '#eee' }}
-                      aria-label="Increase copies"
-                    >
-                      +
-                    </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label id="copies-label" style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Copies</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <button 
+                        onClick={() => setCopies(c => Math.max(1, c-1))} 
+                        className="button" 
+                        style={{ padding: '8px 16px', background: '#eee' }}
+                        aria-label="Decrease copies"
+                      >
+                        -
+                      </button>
+                      <strong aria-labelledby="copies-label">{copies}</strong>
+                      <button 
+                        onClick={() => setCopies(c => c+1)} 
+                        className="button" 
+                        style={{ padding: '8px 16px', background: '#eee' }}
+                        aria-label="Increase copies"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
+                  
+                  <div>
+                    <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Print Type</label>
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input type="radio" name="printType" value="B&W" checked={printType === 'B&W'} onChange={(e) => setPrintType(e.target.value)} />
+                        Black & White
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input type="radio" name="printType" value="Color" checked={printType === 'Color'} onChange={(e) => setPrintType(e.target.value)} />
+                        Colored
+                      </label>
+                    </div>
+                  </div>
+
                   <button 
                     className="button button-accent" 
-                    style={{ width: '100%', marginTop: '32px' }} 
+                    style={{ width: '100%', marginTop: '16px' }} 
                     onClick={handleUpload}
                     disabled={uploading}
                     aria-busy={uploading}
