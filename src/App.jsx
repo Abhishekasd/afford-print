@@ -7,10 +7,20 @@ import Lenis from 'lenis'
 import { 
   Upload, Smartphone, Clock, ShieldCheck, CheckCircle2, 
   ChevronDown, FileText, LayoutDashboard, ExternalLink, Trash2,
-  Image, Paperclip, PenTool, BookOpen, Edit3, Globe, Layout, User
+  Image, Paperclip, PenTool, BookOpen, Edit3, Globe, Layout, User, MessageCircle
 } from 'lucide-react'
 import { supabase } from './lib/supabase'
 import './App.css'
+
+const whatsappStyles = `
+  .whatsapp-btn {
+    transition: all 0.3s ease;
+  }
+  .whatsapp-btn:hover, .whatsapp-btn:focus {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(39, 174, 96, 0.6);
+  }
+`
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -283,12 +293,14 @@ function CustomCursor({ mousePos, isHovering }) {
 function LandingPage() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovering, setIsHovering] = useState(false)
-  const [copies, setCopies] = useState(1)
-  const [file, setFile] = useState(null)
+  
+  // New Form State
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [uploading, setUploading] = useState(false)
-  const [printType, setPrintType] = useState('B&W')
+  const [serviceType, setServiceType] = useState('B/W Printing')
+  const [quantity, setQuantity] = useState('')
+  const [instructions, setInstructions] = useState('')
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     const lenis = new Lenis()
@@ -340,55 +352,56 @@ function LandingPage() {
     }
   }, [])
 
-  const handleUpload = async () => {
-    if (!file || !name || !phone) {
-      alert('Please fill all fields and select a file.')
+  const handleWhatsAppRedirect = (e) => {
+    e.preventDefault()
+    
+    const newErrors = {}
+    if (!name.trim() || name.length > 50) newErrors.name = 'Name is required (max 50 chars).'
+    if (!/^\+?\d{10,15}$/.test(phone)) newErrors.phone = 'Valid phone number is required (10-15 digits).'
+    
+    const validServices = ['B/W Printing', 'Color Printing', 'Binding', 'Assignment Writing', 'PPT Creation', 'Website Creation', 'Packaging Services']
+    if (!validServices.includes(serviceType)) newErrors.serviceType = 'Invalid service selected.'
+    
+    if (quantity && (!Number.isInteger(Number(quantity)) || Number(quantity) < 0 || quantity.toString().length > 5)) {
+      newErrors.quantity = 'Invalid quantity.'
+    }
+    
+    if (instructions.length > 500) newErrors.instructions = 'Instructions exceed 500 characters.'
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
       return
     }
 
-    setUploading(true)
-    try {
-      // 1. Upload file to Supabase Storage
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random().toString(36).substring(7)}.${fileExt}`
-      const filePath = `orders/${fileName}`
+    setErrors({})
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('print-files')
-        .upload(filePath, file)
-
-      if (uploadError) throw uploadError
-
-      // 2. Create DB entry
-      const { data: publicUrlData } = supabase.storage.from('print-files').getPublicUrl(filePath)
-      
-      const { error: dbError } = await supabase.from('orders').insert([
-        {
-          name,
-          phone,
-          file_url: publicUrlData.publicUrl,
-          instructions: `${copies} copies, ${printType} print`,
-          status: 'pending'
-        }
-      ])
-
-      if (dbError) throw dbError
-
-      // 3. Open WhatsApp
-      const waMsg = `Hello Afford Print! I just placed an order.\nName: ${name}\nCopies: ${copies}\nType: ${printType} print\nFile: ${publicUrlData.publicUrl}`
-      window.open(`https://wa.me/919027442522?text=${encodeURIComponent(waMsg)}`, '_blank')
-      
-      alert('Order placed successfully!')
-    } catch (error) {
-      console.error(error)
-      alert('Upload failed. Note: Ensure you have created the "print-files" bucket in Supabase Storage and defined RLS policies.')
-    } finally {
-      setUploading(false)
+    const escapeHtml = (unsafe) => {
+      return (unsafe || '').replace(/[&<"'>]/g, function (match) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[match];
+      });
     }
+
+    const safeName = escapeHtml(name)
+    const safePhone = escapeHtml(phone)
+    const safeService = escapeHtml(serviceType)
+    const safeQuantity = escapeHtml(quantity)
+    const safeInstructions = escapeHtml(instructions)
+
+    const messageTemplate = `Hi, I want to use AFFORD PRINT service:\n\nName: ${safeName}\nPhone: ${safePhone}\n\nService: ${safeService}\nDetails: ${safeQuantity}\n\nInstructions:\n${safeInstructions}\n\nI will send the file here.`
+
+    const redirectUrl = `https://wa.me/919027442522?text=${encodeURIComponent(messageTemplate)}`
+    window.location.href = redirectUrl
   }
 
   return (
     <div className="page-shell">
+      <style>{whatsappStyles}</style>
       <CustomCursor mousePos={mousePos} isHovering={isHovering} />
       
       <nav className="top-nav">
@@ -522,78 +535,57 @@ function LandingPage() {
         {/* Scene 8: The Action */}
         <section className="scene" id="upload">
           <div className="scene-content">
-            <div className="glass-card" style={{ maxWidth: '900px', margin: '0 auto' }}>
-              <h2 className="headline-lg">Convert Your Files Now.</h2>
-              <div className="upload-zone">
-                <input 
-                  type="file" 
-                  id="file-input" 
-                  style={{ display: 'none' }} 
-                  onChange={(e) => setFile(e.target.files[0])} 
-                />
-                <label htmlFor="file-input" style={{ cursor: 'pointer' }}>
-                  <Upload size={64} color="var(--primary)" style={{ marginBottom: '24px' }} />
-                  <h3>{file ? file.name : 'Drag & drop your PDF or DOC'}</h3>
-                  <p>Secure Supabase-backed storage. Max 20MB.</p>
-                </label>
-              </div>
+            <div className="glass-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
+              <h2 className="headline-lg" style={{ textAlign: 'center', marginBottom: '8px' }}>Send Request via WhatsApp</h2>
+              <p style={{ textAlign: 'center', opacity: 0.8, marginBottom: '32px' }}>Fill out the details below and we'll connect with you instantly.</p>
               
-              <div className="responsive-grid" style={{ marginTop: '40px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', textAlign: 'left' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <label style={{ fontWeight: 600 }}>Full Name</label>
-                  <input value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)' }} />
-                  <label style={{ fontWeight: 600 }}>WhatsApp Number</label>
-                  <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 0000000000" style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)' }} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div>
-                    <label id="copies-label" style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Copies</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <button 
-                        onClick={() => setCopies(c => Math.max(1, c-1))} 
-                        className="button" 
-                        style={{ padding: '8px 16px', background: '#eee' }}
-                        aria-label="Decrease copies"
-                      >
-                        -
-                      </button>
-                      <strong aria-labelledby="copies-label">{copies}</strong>
-                      <button 
-                        onClick={() => setCopies(c => c+1)} 
-                        className="button" 
-                        style={{ padding: '8px 16px', background: '#eee' }}
-                        aria-label="Increase copies"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Print Type</label>
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <input type="radio" name="printType" value="B&W" checked={printType === 'B&W'} onChange={(e) => setPrintType(e.target.value)} />
-                        Black & White
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <input type="radio" name="printType" value="Color" checked={printType === 'Color'} onChange={(e) => setPrintType(e.target.value)} />
-                        Colored
-                      </label>
-                    </div>
-                  </div>
-
-                  <button 
-                    className="button button-accent" 
-                    style={{ width: '100%', marginTop: '16px' }} 
-                    onClick={handleUpload}
-                    disabled={uploading}
-                    aria-busy={uploading}
-                  >
-                    {uploading ? 'Processing...' : 'Submit to WhatsApp'}
-                  </button>
-                </div>
+              <div aria-live="polite" style={{ color: '#e74c3c', fontSize: '0.9rem', marginBottom: '16px', textAlign: 'center' }}>
+                {Object.values(errors).map((err, i) => <div key={i}>{err}</div>)}
               </div>
+
+              <form onSubmit={handleWhatsAppRedirect} style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left' }}>
+                <div>
+                  <label htmlFor="name" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Full Name *</label>
+                  <input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" maxLength={50} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.name ? '#e74c3c' : 'var(--outline)'}` }} required />
+                </div>
+                
+                <div>
+                  <label htmlFor="phone" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Phone Number *</label>
+                  <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 0000000000" maxLength={15} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.phone ? '#e74c3c' : 'var(--outline)'}` }} required />
+                </div>
+
+                <div>
+                  <label htmlFor="serviceType" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Service Type *</label>
+                  <select id="serviceType" value={serviceType} onChange={(e) => setServiceType(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)', background: 'var(--surface)' }} required>
+                    <option value="B/W Printing">B/W Printing</option>
+                    <option value="Color Printing">Color Printing</option>
+                    <option value="Binding">Binding</option>
+                    <option value="Assignment Writing">Assignment Writing</option>
+                    <option value="PPT Creation">PPT Creation</option>
+                    <option value="Website Creation">Website Creation</option>
+                    <option value="Packaging Services">Packaging Services</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="quantity" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Pages / Quantity</label>
+                  <input id="quantity" type="number" min="0" max="99999" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="e.g. 50" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.quantity ? '#e74c3c' : 'var(--outline)'}` }} />
+                </div>
+
+                <div>
+                  <label htmlFor="instructions" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Instructions</label>
+                  <textarea id="instructions" value={instructions} onChange={(e) => setInstructions(e.target.value)} placeholder="Any special requests?" maxLength={500} rows={4} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.instructions ? '#e74c3c' : 'var(--outline)'}`, resize: 'vertical' }} />
+                </div>
+
+                <button 
+                  type="submit"
+                  className="button button-accent whatsapp-btn" 
+                  style={{ width: '100%', marginTop: '16px', padding: '16px', fontSize: '1.1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }} 
+                  disabled={!name.trim() || !phone.trim() || !serviceType}
+                >
+                  <MessageCircle size={24} /> Send on WhatsApp
+                </button>
+              </form>
             </div>
           </div>
         </section>
