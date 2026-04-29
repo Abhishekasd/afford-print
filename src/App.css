@@ -168,12 +168,78 @@
   border-color: var(--accent);
 }
 
+/* Responsive Grid Utilities */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
 /* Responsive */
+@media (max-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .scene {
-    padding: 20px;
+    padding: 80px 20px 40px 20px; /* Added top padding for fixed nav */
+    height: auto;
+    min-height: 100vh;
   }
+  
+  .responsive-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .nav-container {
+    padding: 0 20px;
+  }
+
   .display-xl {
-    font-size: 3rem;
+    font-size: 2.5rem;
+  }
+
+  .headline-lg {
+    font-size: 1.8rem;
+  }
+
+  /* Adjust hero sequence for mobile */
+  .hero-sequence-container {
+    height: 70vh !important;
+  }
+
+  .scene-content {
+    padding-top: 20px;
+  }
+  
+  .top-nav {
+    padding: 12px 0;
+  }
+  
+  .brand {
+    font-size: 20px;
+  }
+  
+  .button {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
+
+  /* Hide custom cursor on touch devices */
+  .custom-cursor, .cursor-glow {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .display-xl {
+    font-size: 2.2rem;
+  }
+  
+  .glass-card {
+    padding: 24px 16px;
   }
 }

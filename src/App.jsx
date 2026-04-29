@@ -175,7 +175,7 @@ function PricingSection() {
           </div>
         </div>
 
-        <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+        <div className="responsive-grid">
           <AnimatePresence mode="wait">
             <motion.div 
               key={activeTab}
@@ -205,7 +205,7 @@ function PricingSection() {
         {currentPortfolio.length > 0 && (
           <div style={{ marginTop: '80px' }}>
             <h3 className="headline-sm" style={{ textAlign: 'center', marginBottom: '32px' }}>Our Past Work</h3>
-            <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+            <div className="responsive-grid">
               <AnimatePresence mode="popLayout">
                 {currentPortfolio.map((item, idx) => (
                   <motion.div 
@@ -229,7 +229,7 @@ function PricingSection() {
         )}
 
         {/* Why Choose Us */}
-        <div className="responsive-grid" style={{ marginTop: '80px', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '20px', textAlign: 'center' }}>
+        <div className="responsive-grid" style={{ marginTop: '80px', textAlign: 'center' }}>
           {[
             { label: 'Transparent Pricing', icon: '💎' },
             { label: 'Affordable Rates', icon: '💰' },
@@ -419,7 +419,7 @@ function LandingPage() {
 
         {/* Scene 2: Problem */}
         <section className="scene" style={{ background: '#f8fafd' }}>
-          <div className="scene-content" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '64px', alignItems: 'center' }}>
+          <div className="scene-content responsive-grid" style={{ alignItems: 'center' }}>
             <div>
               <h2 className="headline-lg">Deadlines don't wait. Neither should you.</h2>
               <p>Chaotic paper piles, expensive printers, and closed shops shouldn't stand between you and your submission.</p>
@@ -436,7 +436,7 @@ function LandingPage() {
             <h2 className="headline-lg" style={{ textAlign: 'center' }}>A Stitched Service Experience.</h2>
             <motion.div 
               className="responsive-grid"
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px', marginTop: '48px' }}
+              style={{ marginTop: '48px' }}
               initial="hidden"
               whileInView="show"
               viewport={{ once: true }}
@@ -502,7 +502,7 @@ function LandingPage() {
 
         {/* Scene 5: Technical Precision */}
         <section className="scene">
-          <div className="scene-content" style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '80px' }}>
+          <div className="scene-content responsive-grid" style={{ alignItems: 'center' }}>
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ padding: '8px 16px', background: 'rgba(39, 174, 96, 0.1)', color: 'var(--accent)', borderRadius: '20px', width: 'fit-content' }}>75 GSM Premium</div>
               <h3>Laser Precision.</h3>
@@ -593,7 +593,7 @@ function LandingPage() {
         <p style={{ fontSize: '1.2rem', marginBottom: '24px', opacity: 0.9 }}>
           Affordable printing and digital services — built for students.
         </p>
-        <div className="responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginBottom: '40px', opacity: 0.8 }}>
+        <div className="responsive-grid" style={{ marginBottom: '40px', opacity: 0.8 }}>
           <div>📞 Call / WhatsApp: <br /><strong>9027442522</strong></div>
           <div>🚚 Home Delivery <br />Available</div>
         </div>
