@@ -772,6 +772,7 @@ function AdminDashboard() {
       </header>
 
       <main className="glass-card" style={{ padding: '12px' }}>
+      <main className="glass-card" style={{ padding: '12px' }}>
         {adminTab === 'orders' ? (
           loading ? <p role="status">Loading orders...</p> : (
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
