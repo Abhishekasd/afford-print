@@ -447,8 +447,9 @@ function CustomCursor({ mousePos, isHovering }) {
       <motion.div 
         className="cursor-glow" 
         animate={{
-          scale: isHovering ? 1.5 : 1,
-          opacity: isHovering ? 0.8 : 0.4
+          scale: isHovering ? 1.8 : 1,
+          opacity: isHovering ? 1 : 0.6,
+          border: isHovering ? '1px solid rgba(39, 174, 96, 0.3)' : '1px solid rgba(39, 174, 96, 0)'
         }}
         style={{ 
           x: glowX, 
@@ -507,30 +508,41 @@ function LandingPage() {
     })
 
     const handleMouseMove = (e) => setMousePos({ x: e.clientX, y: e.clientY })
+    
+    const checkHover = (element) => {
+      if (element && element.closest) {
+        return element.closest('button, a, .glass-card, .browser-frame')
+      }
+      return false
+    }
+
     const handleTouchMove = (e) => {
       if (e.touches && e.touches[0]) {
-        setMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY })
+        const touch = e.touches[0]
+        setMousePos({ x: touch.clientX, y: touch.clientY })
+        
+        // Mobile "Hover" detection: Check what's under the finger
+        const element = document.elementFromPoint(touch.clientX, touch.clientY)
+        setIsHovering(!!checkHover(element))
       }
     }
     
     const handleMouseOver = (e) => {
-      if (e.target.closest('button, a, .glass-card, .browser-frame')) {
-        setIsHovering(true)
-      } else {
-        setIsHovering(false)
-      }
+      setIsHovering(!!checkHover(e.target))
     }
 
     window.addEventListener('mousemove', handleMouseMove)
     window.addEventListener('mouseover', handleMouseOver)
-    window.addEventListener('touchmove', handleTouchMove)
-    window.addEventListener('touchstart', handleTouchMove)
+    window.addEventListener('touchmove', handleTouchMove, { passive: true })
+    window.addEventListener('touchstart', handleTouchMove, { passive: true })
+    window.addEventListener('touchend', () => setIsHovering(false))
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseover', handleMouseOver)
       window.removeEventListener('touchmove', handleTouchMove)
       window.removeEventListener('touchstart', handleTouchMove)
+      window.removeEventListener('touchend', () => setIsHovering(false))
       lenis.destroy()
     }
   }, [])
