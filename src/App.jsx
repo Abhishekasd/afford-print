@@ -359,7 +359,7 @@ function WebsitePortfolio() {
                   </div>
                   <div className="browser-content">
                     {project.image ? (
-                      <img src={project.image} alt={project.title} className="project-preview-img" />
+                      <img src={project.image} alt={project.title} className="project-preview-img" loading="lazy" decoding="async" />
                     ) : (
                       <div className={`placeholder-screenshot gradient-${(project.id % 4) + 1}`}>
                         <ExternalLink size={40} color="white" />
