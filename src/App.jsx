@@ -7,7 +7,8 @@ import Lenis from 'lenis'
 import { 
   Upload, Smartphone, Clock, ShieldCheck, CheckCircle2, 
   ChevronDown, FileText,
-  Image, Paperclip, PenTool, BookOpen, Edit3, Globe, Layout, User, MessageCircle
+  Image, Paperclip, PenTool, BookOpen, Edit3, Globe, Layout, User, MessageCircle,
+  Zap, Lightbulb, Target, ExternalLink
 } from 'lucide-react'
 import { supabase } from './lib/supabase'
 import './App.css'
@@ -240,6 +241,178 @@ function PricingSection() {
             <div key={trust.label} style={{ fontSize: '0.85rem', fontWeight: 600 }}>
               <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{trust.icon}</div>
               {trust.label}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// --- Website Portfolio Data & Component ---
+
+const PORTFOLIO_PROJECTS = [
+  {
+    id: 1,
+    title: "ResumAI",
+    url: "https://magnificent-toffee-843956.netlify.app/",
+    image: "/portfolio/resumai.png",
+    spark: "To create a high-impact digital identity that turns resumes into career-defining documents.",
+    fix: "Eliminated the 'boring resume' syndrome with high-performance animations and cinematic layouts.",
+    icon: <User size={32} />
+  },
+  {
+    id: 2,
+    title: "MultiTool Verse",
+    url: "https://multitoolverse.netlify.app/",
+    image: "/portfolio/multitool_verse.png",
+    spark: "A vision for a centralized digital workshop where developers and students find everything they need in one place.",
+    fix: "Solved tool-switching fatigue by consolidating utility tools into a single, high-speed interface.",
+    icon: <Zap size={32} />
+  },
+  {
+    id: 3,
+    title: "Learning Hub",
+    url: "https://tvslearninghub.netlify.app/",
+    image: "/portfolio/learning_hub.png",
+    spark: "To bridge the gap between complex academic resources and student accessibility.",
+    fix: "Reduced navigation friction for educational content, making complex materials easy to digest.",
+    icon: <BookOpen size={32} />
+  },
+  {
+    id: 4,
+    title: "Morning Muse",
+    url: "https://morningmuse.netlify.app/",
+    image: "/portfolio/morning_muse.png",
+    spark: "Created to redefine the morning routine as a source of creative inspiration rather than a drain.",
+    fix: "Solved the 'morning brain fog' by delivering structured, inspiring content at the peak of focus.",
+    icon: <Target size={32} />
+  },
+  {
+    id: 5,
+    title: "The Age Clock",
+    url: "https://theageclock.netlify.app/",
+    image: "/portfolio/age_clock.png",
+    spark: "To provide a visceral, real-time visualization of life's most precious asset: Time.",
+    fix: "Turned abstract biological data into a grounding, philosophical tool for daily perspective.",
+    icon: <Clock size={32} />
+  },
+  {
+    id: 6,
+    title: "LetterCraft AI",
+    url: "https://lettercraftai.netlify.app/",
+    image: "/portfolio/lettercraft.png",
+    spark: "Harnessing AI to remove the anxiety and time-sink of formal correspondence.",
+    fix: "Instant generation of professional, tone-accurate letters, saving hours of manual drafting.",
+    icon: <Edit3 size={32} />
+  },
+  {
+    id: 7,
+    title: "Electrical Works",
+    url: "https://shrihariomelectricalworks.netlify.app/",
+    image: "/portfolio/electrical_works.png",
+    spark: "To bring traditional trade services into the modern digital era with professional visibility.",
+    fix: "Solved the local service discovery gap with a trust-focused, clear digital storefront.",
+    icon: <ShieldCheck size={32} />
+  },
+  {
+    id: 8,
+    title: "Krishna Play Way",
+    url: "https://krishnaplaywayschool.netlify.app/",
+    image: "/portfolio/krishna_playway.png",
+    spark: "Building a transparent window into the world of early childhood education for parents.",
+    fix: "Enhanced trust and communication between schools and parents through a vibrant digital portal.",
+    icon: <Globe size={32} />
+  }
+];
+
+function WebsitePortfolio() {
+  return (
+    <section className="scene" id="portfolio" style={{ height: 'auto', padding: '100px 24px' }}>
+      <div className="scene-content">
+        <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+          <h2 className="headline-lg">Websites We Built. Stories We Told.</h2>
+          <p style={{ maxWidth: '600px', margin: '0 auto', opacity: 0.7 }}>
+            Every project starts with a problem. Here is how we solved them through creative design and precision engineering.
+          </p>
+        </div>
+
+        <div className="portfolio-stack">
+          {PORTFOLIO_PROJECTS.map((project, index) => (
+            <div key={project.id} className={`case-study-row ${index % 2 === 0 ? '' : 'row-reverse'}`}>
+              <motion.div 
+                className="case-study-visual"
+                initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                onClick={() => window.open(project.url, '_blank')}
+              >
+                <div className="browser-frame">
+                  <div className="browser-top">
+                    <div className="browser-dots">
+                      <span className="dot red"></span>
+                      <span className="dot yellow"></span>
+                      <span className="dot green"></span>
+                    </div>
+                    <div className="url-bar">{project.url.replace('https://', '')}</div>
+                  </div>
+                  <div className="browser-content">
+                    {project.image ? (
+                      <img src={project.image} alt={project.title} className="project-preview-img" />
+                    ) : (
+                      <div className={`placeholder-screenshot gradient-${(project.id % 4) + 1}`}>
+                        <ExternalLink size={40} color="white" />
+                        <span style={{ fontWeight: 600 }}>Click to Visit Live Site</span>
+                      </div>
+                    )}
+                    <div className="live-overlay">
+                      <div className="live-badge">
+                        <span className="pulse-dot"></span> LIVE SITE
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                className="case-study-text"
+                initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                <div className="story-label">Success Story 0{project.id}</div>
+                <h3 className="headline-sm" style={{ fontSize: '2.8rem', marginBottom: '32px', color: 'var(--on-background)' }}>{project.title}</h3>
+                
+                <div className="story-item">
+                  <div className="story-icon">{project.icon}</div>
+                  <div className="story-body">
+                    <h4 style={{ color: 'var(--primary)', fontWeight: 700 }}>The Spark (Why?)</h4>
+                    <p style={{ fontSize: '1.1rem', opacity: 0.9 }}>{project.spark}</p>
+                  </div>
+                </div>
+
+                <div className="story-item">
+                  <div className="story-icon"><CheckCircle2 size={32} color="var(--accent)" /></div>
+                  <div className="story-body">
+                    <h4 style={{ color: 'var(--accent)', fontWeight: 700 }}>The Fix (How?)</h4>
+                    <p style={{ fontSize: '1.1rem', opacity: 0.9 }}>{project.fix}</p>
+                  </div>
+                </div>
+
+                <motion.a 
+                  href={project.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="button button-primary"
+                  style={{ marginTop: '32px', gap: '12px' }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Explore Live Project <ExternalLink size={20} />
+                </motion.a>
+              </motion.div>
             </div>
           ))}
         </div>
@@ -518,6 +691,8 @@ function LandingPage() {
             </div>
           </div>
         </section>
+
+        <WebsitePortfolio />
 
         <PricingSection />
 
