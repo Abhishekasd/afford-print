@@ -9,7 +9,7 @@
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
-  /* Remove transition to let framer-motion handle it smoothly */
+  transition: transform 0.1s ease-out;
 }
 
 .cursor-glow {
@@ -199,7 +199,8 @@
   }
 
   .display-xl {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+    line-height: 1.1;
   }
 
   .headline-lg {
@@ -228,10 +229,7 @@
     font-size: 0.9rem;
   }
 
-  /* Hide custom cursor on touch devices */
-  .custom-cursor, .cursor-glow {
-    display: none !important;
-  }
+  /* Custom cursor enabled for mobile */
 }
 
 @media (max-width: 480px) {
@@ -301,6 +299,15 @@
 .story-body p {
   opacity: 0.8;
   line-height: 1.6;
+  font-size: 1rem;
+}
+
+/* Responsive Headline SM */
+.headline-sm-responsive {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.2;
+  margin-bottom: 24px;
 }
 
 /* Browser Frame */

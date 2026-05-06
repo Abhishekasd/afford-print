@@ -110,7 +110,7 @@ function HeroAnimation() {
         >
           Print Smarter,<br />Not Harder.
         </motion.h1>
-        <p style={{ fontSize: '1.5rem', marginTop: '24px', maxWidth: '600px', color: 'white', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+        <p style={{ fontSize: 'clamp(1rem, 4vw, 1.5rem)', marginTop: '24px', maxWidth: '600px', color: 'white', textShadow: '0 2px 10px rgba(0,0,0,0.5)', padding: '0 20px' }}>
           The cinematic, high-speed printing solution designed for students who value precision over chaos.
         </p>
       </div>
@@ -383,7 +383,7 @@ function WebsitePortfolio() {
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
                 <div className="story-label">Success Story 0{project.id}</div>
-                <h3 className="headline-sm" style={{ fontSize: '2.8rem', marginBottom: '32px', color: 'var(--on-background)' }}>{project.title}</h3>
+                <h3 className="headline-sm-responsive" style={{ color: 'var(--on-background)' }}>{project.title}</h3>
                 
                 <div className="story-item">
                   <div className="story-icon">{project.icon}</div>
@@ -423,15 +423,15 @@ function WebsitePortfolio() {
 
 function CustomCursor({ mousePos, isHovering }) {
   // Glow uses springs for that cinematic "trailing" feel
-  const glowX = useSpring(mousePos.x, { damping: 10, stiffness: 50 })
-  const glowY = useSpring(mousePos.y, { damping: 10, stiffness: 50 })
+  const glowX = useSpring(mousePos.x, { damping: 15, stiffness: 100 })
+  const glowY = useSpring(mousePos.y, { damping: 15, stiffness: 100 })
 
   return (
     <>
       <motion.div 
         className="custom-cursor" 
         animate={{
-          scale: isHovering ? 4 : 1,
+          scale: isHovering ? 3 : 1,
           backgroundColor: isHovering ? 'rgba(39, 174, 96, 0.4)' : 'var(--primary)',
           border: isHovering ? '1px solid var(--accent)' : 'none'
         }}
@@ -507,8 +507,14 @@ function LandingPage() {
     })
 
     const handleMouseMove = (e) => setMousePos({ x: e.clientX, y: e.clientY })
+    const handleTouchMove = (e) => {
+      if (e.touches && e.touches[0]) {
+        setMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY })
+      }
+    }
+    
     const handleMouseOver = (e) => {
-      if (e.target.closest('button, a, .glass-card')) {
+      if (e.target.closest('button, a, .glass-card, .browser-frame')) {
         setIsHovering(true)
       } else {
         setIsHovering(false)
@@ -517,10 +523,14 @@ function LandingPage() {
 
     window.addEventListener('mousemove', handleMouseMove)
     window.addEventListener('mouseover', handleMouseOver)
+    window.addEventListener('touchmove', handleTouchMove)
+    window.addEventListener('touchstart', handleTouchMove)
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseover', handleMouseOver)
+      window.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('touchstart', handleTouchMove)
       lenis.destroy()
     }
   }, [])
