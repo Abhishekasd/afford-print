@@ -7,8 +7,8 @@ import Lenis from 'lenis'
 import { 
   Upload, Smartphone, Clock, ShieldCheck, CheckCircle2, 
   ChevronDown, FileText,
-  Image, Paperclip, PenTool, BookOpen, Edit3, Globe, Layout, User, MessageCircle,
-  Zap, Lightbulb, Target, ExternalLink
+  Image, Paperclip, PenTool, BookOpen, PenLine, Globe, Layout, User, MessageCircle,
+  Zap, Lightbulb, Target, ExternalLink, Sun, Moon
 } from 'lucide-react'
 import { supabase } from './lib/supabase'
 import './App.css'
@@ -20,6 +20,27 @@ const whatsappStyles = `
   .whatsapp-btn:hover, .whatsapp-btn:focus {
     transform: scale(1.05);
     box-shadow: 0 0 15px rgba(39, 174, 96, 0.6);
+  }
+  .theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--on-surface);
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(15deg);
+  }
+  .dark .theme-toggle {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--accent);
   }
 `
 
@@ -113,6 +134,7 @@ function HeroAnimation() {
         <p style={{ fontSize: 'clamp(1rem, 4vw, 1.5rem)', marginTop: '24px', maxWidth: '600px', color: 'white', textShadow: '0 2px 10px rgba(0,0,0,0.5)', padding: '0 20px' }}>
           The cinematic, high-speed printing solution designed for students who value precision over chaos.
         </p>
+
       </div>
     </div>
   )
@@ -141,7 +163,7 @@ function PricingSection() {
     academic: [
       { name: 'Assignment Writing', price: 'Based on content', desc: 'Neat & formatted assignments.', icon: <PenTool size={24} /> },
       { name: 'Practical Files', price: 'Based on pages', desc: 'Well-structured presentation.', icon: <BookOpen size={24} /> },
-      { name: 'Copy Writing', price: 'Based on content', desc: 'Clear, neat handwritten work.', icon: <Edit3 size={24} /> }
+      { name: 'Copy Writing', price: 'Based on content', desc: 'Clear, neat handwritten work.', icon: <PenLine size={24} /> }
     ],
     digital: [
       { name: 'Website Creation', price: 'From ₹499', desc: 'Simple, responsive student sites.', icon: <Globe size={24} /> },
@@ -155,6 +177,7 @@ function PricingSection() {
       <div className="scene-content">
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
           <h2 className="headline-lg">Premium Services. Student Prices.</h2>
+
           <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '24px', flexWrap: 'wrap' }}>
             {Object.keys(categories).map(cat => (
               <button 
@@ -304,7 +327,7 @@ const PORTFOLIO_PROJECTS = [
     image: "/portfolio/lettercraft.png",
     spark: "Harnessing AI to remove the anxiety and time-sink of formal correspondence.",
     fix: "Instant generation of professional, tone-accurate letters, saving hours of manual drafting.",
-    icon: <Edit3 size={32} />
+    icon: <PenLine size={32} />
   },
   {
     id: 7,
@@ -467,6 +490,14 @@ function CustomCursor({ mousePos, isHovering }) {
 function LandingPage() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovering, setIsHovering] = useState(false)
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme')
+      if (saved) return saved
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    }
+    return 'light'
+  })
   
   // New Form State
   const [name, setName] = useState('')
@@ -475,6 +506,15 @@ function LandingPage() {
   const [quantity, setQuantity] = useState('')
   const [instructions, setInstructions] = useState('')
   const [errors, setErrors] = useState({})
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    localStorage.setItem('theme', theme)
+  }, [theme])
 
   useEffect(() => {
     const lenis = new Lenis()
@@ -602,7 +642,14 @@ function LandingPage() {
       <nav className="top-nav">
         <div className="nav-container">
           <Link to="/" className="brand">AFFORD PRINT</Link>
-          <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <button 
+              onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+              className="theme-toggle"
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
             <a className="button button-primary" href="#upload">Upload Now</a>
           </div>
         </div>

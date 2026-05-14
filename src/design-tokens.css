@@ -28,4 +28,23 @@
   --radius-default: 8px;
   --radius-lg: 16px;
   --radius-full: 9999px;
+
+  /* Transitions */
+  --theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Dark Mode Overrides */
+.dark {
+  --background: #0A1A2B;
+  --on-background: #F4F7F9;
+  --surface: #0D2335;
+  --surface-dim: #071521;
+  --on-surface: #F4F7F9;
+  --on-surface-variant: #A0B3C6;
+  
+  --glass-bg: rgba(13, 35, 53, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-glow: rgba(39, 174, 96, 0.2);
+
+  --primary-light: #5BA4D4;
 }
