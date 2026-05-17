@@ -46,13 +46,20 @@ const whatsappStyles = `
 
 gsap.registerPlugin(ScrollTrigger)
 
+const getAssetPath = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${import.meta.env.BASE_URL}${cleanPath}`;
+};
+
 // --- Helper Components ---
 
 function HeroAnimation() {
   const canvasRef = useRef(null)
   const [images, setImages] = useState([])
   const frameCount = 80
-  const currentFrame = (index) => `/hero-animation/afford hero image_${index.toString().padStart(3, '0')}.jpg`
+  const currentFrame = (index) => getAssetPath(`/hero-animation/afford hero image_${index.toString().padStart(3, '0')}.jpg`)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -382,7 +389,7 @@ function WebsitePortfolio() {
                   </div>
                   <div className="browser-content">
                     {project.image ? (
-                      <img src={project.image} alt={project.title} className="project-preview-img" loading="lazy" decoding="async" />
+                      <img src={getAssetPath(project.image)} alt={project.title} className="project-preview-img" loading="lazy" decoding="async" />
                     ) : (
                       <div className={`placeholder-screenshot gradient-${(project.id % 4) + 1}`}>
                         <ExternalLink size={40} color="white" />
@@ -849,7 +856,7 @@ function LandingPage() {
 
 function App() {
   return (
-    <Router>
+    <Router basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
       </Routes>
