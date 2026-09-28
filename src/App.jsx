@@ -194,7 +194,7 @@ function PricingSection() {
                 style={{ 
                   textTransform: 'capitalize', 
                   padding: '12px 24px', 
-                  background: activeTab === cat ? 'var(--primary)' : 'rgba(0,0,0,0.05)', 
+                  background: activeTab === cat ? 'var(--primary)' : 'var(--glass-bg)', 
                   color: activeTab === cat ? 'white' : 'var(--on-surface)',
                   borderRadius: '30px',
                   minWidth: '120px'
@@ -667,7 +667,7 @@ function LandingPage() {
         <HeroAnimation />
 
         {/* Scene 2: Problem */}
-        <section className="scene" style={{ background: '#f8fafd' }}>
+        <section className="scene" style={{ background: 'var(--surface-dim)' }}>
           <div className="scene-content responsive-grid" style={{ alignItems: 'center' }}>
             <div>
               <h2 className="headline-lg">Deadlines don't wait. Neither should you.</h2>
@@ -753,7 +753,7 @@ function LandingPage() {
         <section className="scene">
           <div className="scene-content responsive-grid" style={{ alignItems: 'center' }}>
             <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ padding: '8px 16px', background: 'rgba(39, 174, 96, 0.1)', color: 'var(--accent)', borderRadius: '20px', width: 'fit-content' }}>75 GSM Premium</div>
+              <div style={{ padding: '8px 16px', background: 'var(--glass-bg)', color: 'var(--accent)', borderRadius: '20px', width: 'fit-content' }}>75 GSM Premium</div>
               <h3>Laser Precision.</h3>
               <p>Every page is a testament to clarity. No ink bleeds, just crisp text.</p>
             </div>
@@ -794,17 +794,17 @@ function LandingPage() {
               <form onSubmit={handleWhatsAppRedirect} style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left' }}>
                 <div>
                   <label htmlFor="name" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Full Name *</label>
-                  <input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" maxLength={50} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.name ? '#e74c3c' : 'var(--outline)'}` }} required />
+                  <input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" maxLength={50} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.name ? '#e74c3c' : 'var(--outline)'}`, background: 'var(--surface)', color: 'var(--on-surface)' }} required />
                 </div>
                 
                 <div>
                   <label htmlFor="phone" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Phone Number *</label>
-                  <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 0000000000" maxLength={15} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.phone ? '#e74c3c' : 'var(--outline)'}` }} required />
+                  <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 0000000000" maxLength={15} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.phone ? '#e74c3c' : 'var(--outline)'}`, background: 'var(--surface)', color: 'var(--on-surface)' }} required />
                 </div>
 
                 <div>
                   <label htmlFor="serviceType" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Service Type *</label>
-                  <select id="serviceType" value={serviceType} onChange={(e) => setServiceType(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)', background: 'var(--surface)' }} required>
+                  <select id="serviceType" value={serviceType} onChange={(e) => setServiceType(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline)', background: 'var(--surface)', color: 'var(--on-surface)' }} required>
                     <option value="B/W Printing">B/W Printing</option>
                     <option value="Color Printing">Color Printing</option>
                     <option value="Binding">Binding</option>
@@ -817,12 +817,12 @@ function LandingPage() {
 
                 <div>
                   <label htmlFor="quantity" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Pages / Quantity</label>
-                  <input id="quantity" type="number" min="0" max="99999" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="e.g. 50" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.quantity ? '#e74c3c' : 'var(--outline)'}` }} />
+                  <input id="quantity" type="number" min="0" max="99999" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="e.g. 50" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.quantity ? '#e74c3c' : 'var(--outline)'}`, background: 'var(--surface)', color: 'var(--on-surface)' }} />
                 </div>
 
                 <div>
                   <label htmlFor="instructions" style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>Instructions</label>
-                  <textarea id="instructions" value={instructions} onChange={(e) => setInstructions(e.target.value)} placeholder="Any special requests?" maxLength={500} rows={4} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.instructions ? '#e74c3c' : 'var(--outline)'}`, resize: 'vertical' }} />
+                  <textarea id="instructions" value={instructions} onChange={(e) => setInstructions(e.target.value)} placeholder="Any special requests?" maxLength={500} rows={4} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${errors.instructions ? '#e74c3c' : 'var(--outline)'}`, resize: 'vertical', background: 'var(--surface)', color: 'var(--on-surface)' }} />
                 </div>
 
                 <button 
@@ -839,8 +839,8 @@ function LandingPage() {
         </section>
       </main>
       
-      <footer style={{ padding: '80px 24px', background: '#0a1a2b', color: 'white', textAlign: 'center' }}>
-        <div className="brand" style={{ color: 'white', marginBottom: '16px' }}>AFFORD PRINT</div>
+      <footer style={{ padding: '80px 24px', background: 'var(--surface-dim)', color: 'var(--on-surface)', textAlign: 'center' }}>
+        <div className="brand" style={{ color: 'var(--on-surface)', marginBottom: '16px' }}>AFFORD PRINT</div>
         <p style={{ fontSize: '1.2rem', marginBottom: '24px', opacity: 0.9 }}>
           Affordable printing and digital services — built for students.
         </p>

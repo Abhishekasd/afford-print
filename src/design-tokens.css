@@ -12,6 +12,10 @@
   --surface-dim: #F4F7F9;
   --on-surface: #0A3D62;
   --on-surface-variant: #3D5066;
+  --outline: rgba(10, 61, 98, 0.2);
+
+  --nav-bg: rgba(255, 255, 255, 0.8);
+  --nav-border: rgba(10, 61, 98, 0.1);
   
   /* Glass-morphism (PRD: blur 8px) */
   --glass-bg: rgba(255, 255, 255, 0.2);
@@ -41,6 +45,10 @@
   --surface-dim: #071521;
   --on-surface: #F4F7F9;
   --on-surface-variant: #A0B3C6;
+  --outline: rgba(255, 255, 255, 0.2);
+  
+  --nav-bg: rgba(10, 26, 43, 0.8);
+  --nav-border: rgba(255, 255, 255, 0.1);
   
   --glass-bg: rgba(13, 35, 53, 0.4);
   --glass-border: rgba(255, 255, 255, 0.1);
